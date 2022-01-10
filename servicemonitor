@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+SM_LIB_DIR=/usr/lib/servicemonitor
+
+cd $SM_LIB_DIR
+/usr/bin/env python3 application.py $SM_LIB_DIR

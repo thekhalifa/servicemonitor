@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<schemalist>
+    <schema id="com.github.thekhalifa.servicemonitor" path="/com/github/thekhalifa/servicemonitor/">
+        <key name="showinactive" type="b">
+            <default>false</default>
+            <summary>Always show inactive units</summary>
+        </key>
+        <key name="winmaximized" type="b">
+            <default>false</default>
+            <summary>Main window maximized</summary>
+        </key>
+        <key name="winposition" type="(iiii)">
+            <default>(20,20,570,380)</default>
+            <summary>Main window coordinates and dimensions</summary>
+        </key>
+        <key name="hide-service-cols" type="as">
+            <default>[]</default>
+            <summary>Names of columns to hide in service list</summary>
+        </key>
+        <key name="hide-timer-cols" type="as">
+            <default>[]</default>
+            <summary>Names of columns to hide in timer list</summary>
+        </key>
+        <key name="hide-socket-cols" type="as">
+            <default>[]</default>
+            <summary>Names of columns to hide in socket list</summary>
+        </key>
+    </schema>
+</schemalist>

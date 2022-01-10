@@ -1,0 +1,10 @@
+[Desktop Entry]
+Name=Service Monitor
+Comment=Live monitor for systemd units
+Exec=servicemonitor.sh
+Icon=servicemonitor
+Terminal=false
+Type=Application
+StartupNotify=false
+Categories=GNOME;GTK;System;
+Keywords=Service;Timer;Socket;Monitor;systemd;
