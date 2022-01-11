@@ -4,6 +4,7 @@ import subprocess
 import sys
 
 import gi
+
 gi.require_version("Gtk", "3.0")
 from gi.repository import Gtk, Gdk, GLib
 
@@ -24,10 +25,11 @@ ABOUT_LICENSE = Gtk.License.GPL_3_0
 
 class ServiceMonitor:
     run_dir = None
+    helper_dir = None
     dbuscaller = DBusCaller()
     dbusready = False
     UI_FILE = "application.ui"
-    UNIT_HELPER_CMD = '/home/coleus/Dev/Linux/systemgear/unithelper.py'
+    UNIT_HELPER_CMD = 'unithelper.py'
     REFRESH_DBUS_WAIT = 1
     ICON_ENABLE_ON = "gtk-add"
     ICON_ENABLE_OFF = "gtk-remove"
@@ -95,8 +97,12 @@ class ServiceMonitor:
                   "Result"],
         "socket": ["Listen", "Triggers", "FileDescriptorName", "FragmentPath", "Result", "NAccept", "NConnections"]}
 
-    def __init__(self, uidir):
-        self.run_dir = uidir
+    def __init__(self, rundir, helperdir=None):
+        self.run_dir = os.path.abspath(rundir)
+        if helperdir is None:
+            self.helper_dir = self.run_dir
+        else:
+            self.helper_dir = os.path.abspath(helperdir)
 
     def _getconvert_coltypes(self, unittype):
         columns = self.ui_columns[unittype]
@@ -212,8 +218,6 @@ class ServiceMonitor:
         # else:
         #     self.toolbar_state(start=False, stop=False, restart=False, info=True)
 
-
-
     def refresh_manager(self):
         if self.pending_refresh:
             return
@@ -305,7 +309,6 @@ class ServiceMonitor:
         self.store_hidden_columns(self.service_ui)
         self.store_hidden_columns(self.timer_ui)
         self.store_hidden_columns(self.socket_ui)
-
 
     def on_about_clicked(self, *args):
         about = Gtk.AboutDialog(program_name=ABOUT_NAME, version=ABOUT_VERSION,
@@ -402,7 +405,8 @@ class ServiceMonitor:
         elif unitfilestate == "disabled":
             action = "enable"
 
-        argslist = ['pkexec', '--disable-internal-agent', self.UNIT_HELPER_CMD, name, action]
+        argslist = ['pkexec', '--disable-internal-agent',
+                    os.path.join(self.helper_dir, self.UNIT_HELPER_CMD), name, action]
         ps = subprocess.run(argslist, capture_output=True)
         if ps.returncode == 0:
             self.refresh_manager()
@@ -412,7 +416,8 @@ class ServiceMonitor:
             print(f"Could not perform change unit file state for {name}")
             print(error)
             print(output)
-            msgdlg = Gtk.MessageDialog(transient_for=self.window, message_type=Gtk.MessageType.ERROR, buttons=Gtk.ButtonsType.OK,
+            msgdlg = Gtk.MessageDialog(transient_for=self.window, message_type=Gtk.MessageType.ERROR,
+                                       buttons=Gtk.ButtonsType.OK,
                                        text=f"Could not change unit file state {name}")
             msgdlg.format_secondary_text(output)
             msgdlg.run()
@@ -471,6 +476,7 @@ class ServiceMonitor:
         builder = Gtk.Builder.new_from_file(os.path.join(self.run_dir, self.UI_FILE))
         builder.connect_signals(self)
         self.window = builder.get_object("main_window")
+        self.window.set_title(ABOUT_NAME)
         self.service_ui["treeview"] = builder.get_object("treeview_services")
         self.timer_ui["treeview"] = builder.get_object("treeview_timers")
         self.socket_ui["treeview"] = builder.get_object("treeview_sockets")
@@ -511,9 +517,13 @@ class ServiceMonitor:
                 self.window.set_default_size(neww, newh)
 
 
-if len(sys.argv) != 2:
+if len(sys.argv) < 2:
     print("Missing lib dir, exiting")
     exit(1)
-mainwindow = ServiceMonitor(sys.argv[1])
+elif len(sys.argv) == 2:
+    mainwindow = ServiceMonitor(sys.argv[1])
+else:
+    mainwindow = ServiceMonitor(sys.argv[1], sys.argv[2])
+
 mainwindow.startup()
 mainwindow.run()

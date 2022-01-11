@@ -11,7 +11,7 @@ RUN_FILE=servicemonitor
 
 TARGET_INSTALL_DIR=/usr/lib/servicemonitor/
 TARGET_ICON_DIR=/usr/share/icons/hicolor/
-TARGET_APP_ICON_DIR=${TARGET_ICON_DIR}scalable/apps/
+TARGET_APP_ICON_DIR=${TARGET_ICON_DIR}48x48/apps/
 TARGET_STATUS_ICON_DIR=${TARGET_ICON_DIR}scalable/status/
 TARGET_SCHEMA_DIR=/usr/share/glib-2.0/schemas
 TARGET_POLKIT_DIR=/usr/share/polkit-1/actions
@@ -26,7 +26,7 @@ usage:
 	@echo "  -- install (to install it system wide)"
 
 runlocal:
-	python3 src/application.py data/ui
+	python3 src/application.py data/ui ./src
 
 install: installpackage installschema installicons installpolkit installdesktop
 	@echo Install complete

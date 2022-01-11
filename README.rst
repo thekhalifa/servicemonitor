@@ -12,6 +12,9 @@ Help with testing and issues is very welcome through github
 
 * https://github.com/thekhalifa/servicemonitor
 
+.. image:: data/sm-screenshot.png
+
+
 How to install
 --------------
 As this uses python3 and queries DBus through GLib, the following dependencies
@@ -31,7 +34,7 @@ Then you should find *Service Monitor* app
 
 How to run locally
 ------------------
-You can quickly run the application, but some icons will be missing
+You can run the application from the current directly, but some icons will be missing
 ::
     make runlocal
 
