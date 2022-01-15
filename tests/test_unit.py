@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 
 import unittest
-from unit import Unit
+from src.unit import Unit
 
 
 class UnitTestCase(unittest.TestCase):

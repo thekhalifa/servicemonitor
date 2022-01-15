@@ -42,22 +42,14 @@ class PrefDialog:
 
     def populate_treeview_from_treecolumns(self, targettree, sourcetree, treetype):
         if not targettree or not sourcetree:
-            print("populate exit:", targettree is None, sourcetree is None)
             return
 
         liststore = Gtk.ListStore(bool, str, int)
-        if type(sourcetree) is list:
-            print("populate dummy data")
-            liststore.append([True, "First Row", 0])
-            liststore.append([False, "Second Row", 1])
-            liststore.append([False, "Third Longer Row", 2])
-        else:
-            treecols = sourcetree.get_columns()
-            print("populate cols: ", len(treecols))
-            for index, col in enumerate(treecols):
-                title = col.get_title()
-                visible = col.get_visible()
-                liststore.append([visible, title, index])
+        treecols = sourcetree.get_columns()
+        for index, col in enumerate(treecols):
+            title = col.get_title()
+            visible = col.get_visible()
+            liststore.append([visible, title, index])
 
         targettree.set_model(liststore)
         self.targetmodel[treetype] = liststore
@@ -71,10 +63,8 @@ class PrefDialog:
         targettree.set_headers_visible(False)
 
     def on_columnstate_toggle(self, cell, path, data):
-        print("PrefEvent: on_columnstate_toggle", cell, path, data)
         column_name = self.targetmodel[data][path][1]
         column_index = self.targetmodel[data][path][2]
-        print(f"---------: column {column_name} at index {column_index}")
         newstate = not self.targetmodel[data][path][0]
         self.targetmodel[data][path][0] = newstate
         sourcetree = self.sourcetrees[data]

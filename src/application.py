@@ -4,21 +4,20 @@ import subprocess
 import sys
 
 import gi
-
 gi.require_version("Gtk", "3.0")
 from gi.repository import Gtk, Gdk, GLib
 
-from infodlg import InfoDialog
-from preferences import PrefDialog, PrefStorage
-from dbuscaller import DBusCaller
-from unit import Unit
+from .infodlg import InfoDialog
+from .preferences import PrefDialog, PrefStorage
+from .dbuscaller import DBusCaller
+
 
 ABOUT_NAME = "Service Monitor"
-ABOUT_VERSION = "v 0.1"
+ABOUT_VERSION = "v 0.2"
 ABOUT_COPYRIGHT = "Copyright 2021 Ahmad Khalifa"
 ABOUT_AUTHORS = ["Ahmad Khalifa"]
 ABOUT_WEBSITE = "https://github.com/thekhalifa/servicemonitor"
-ABOUT_ICON = "angry-eye"
+ABOUT_ICON = "servicemonitor"
 ABOUT_COMMENT = "Live monitor for systemd units."
 ABOUT_LICENSE = Gtk.License.GPL_3_0
 
@@ -145,7 +144,6 @@ class ServiceMonitor:
 
     def refresh_ui(self):
         if not self.dbusready:
-            print("refresh_ui - dbus not ready yet")
             return
         # remove all data
         self.current_ui["datastore"].clear()
@@ -156,9 +154,9 @@ class ServiceMonitor:
         statefilter = ['active']
         if self.include_all:
             statefilter = []
+
         unitlist = self.dbuscaller.list_details(statefilter, unitfilter, self.ui_detail_columns[unittype])
         totalunits = len(unitlist)
-        print("refresh_ui - total units", totalunits)
         for u in unitlist:
             line = []
             for column in columns:
@@ -180,11 +178,9 @@ class ServiceMonitor:
             self.toolbar_state()
             return
         name, substate, unitstate = model.get(row, 0, 3, 4)
-        # print(f"-----: selection of {name} with substate {substate}")
         start = False
         stop = False
         restart = False
-        enable = False
         info = True
 
         if substate == "exited" or substate == "failed" or substate == "dead":
@@ -240,29 +236,23 @@ class ServiceMonitor:
 
     # Tree Selection
     def on_tree_selection_change(self, select, data):
-        # print("Event: on_tree_selection_change", select.get_tree_view().get_name(), data)
         self.refresh_toolbar_state(select)
 
     # Header bar actions
     def on_show_inactive_state_set(self, widget, data):
-        print("Event: on_show_inactive_state_set to", data)
         self.include_all = data
         self.refresh_ui()
 
     def on_toprefresh_clicked(self, widget):
-        print("Event: on_toprefresh_clicked")
         self.refresh_ui()
 
     # Search events
     def on_main_search_search_changed(self, widget):
-        # print("Event: on_main_search_search_changed to", widget.get_text())
         self.current_ui["searchterm"] = widget.get_text()
         self.current_ui["filter"].refilter()
 
     def on_mainstack_set_focus_child(self, widget, data):
-        # print("Event: on_mainstack_set_focus_child to", widget.get_name(), "data", type(data))
         boxname = widget.get_visible_child_name()
-        # print("   --  box name:", boxname)
         if self.current_ui and self.current_ui["unittype"] == boxname:
             return
         elif boxname == "service":
@@ -279,7 +269,6 @@ class ServiceMonitor:
         self.current_ui["filter"].refilter()
 
     def on_unitaction_clicked(self, widget):
-        print("Event: on_unitaction_clicked - ", widget.get_name())
         action = widget.get_name()
         if action == "info-btn":
             self.show_info_dialog()
@@ -300,7 +289,6 @@ class ServiceMonitor:
         self.call_unit_method(unitmethod)
 
     def on_preferences_clicked(self, widget):
-        print("Event: on_preferences_clicked - ", widget.get_name())
         pref_dialog = PrefDialog(self.window, self.run_dir, self.service_ui["treeview"], self.timer_ui["treeview"],
                                  self.socket_ui["treeview"])
         pref_dialog.run()
@@ -329,16 +317,13 @@ class ServiceMonitor:
 
     def on_main_window_destroy(self, *args):
         self.dbuscaller.close_dbus()
-
         # save user settings
-        print("saving settings...")
         PrefStorage.set(PrefStorage.SHOW_INACTIVE, self.include_all)
         PrefStorage.set(PrefStorage.WIN_MAXIMIZED, self.winmaximized)
         PrefStorage.set(PrefStorage.WIN_POSITION, self.winposition)
         PrefStorage.set(PrefStorage.HIDE_SERVICE_COL, self.service_ui["hidden_cols"])
         PrefStorage.set(PrefStorage.HIDE_TIMER_COL, self.timer_ui["hidden_cols"])
         PrefStorage.set(PrefStorage.HIDE_SOCKET_COL, self.socket_ui["hidden_cols"])
-
         # End it all
         Gtk.main_quit()
 
@@ -347,14 +332,11 @@ class ServiceMonitor:
         selection = treeview.get_selection()
         model, row = selection.get_selected()
         if not model or not row:
-            print("Error, nothing selected for info")
             return
         name, *k = model.get(row, 0)
         if not name:
-            print("Error, bad name for info")
             return
         unit = self.dbuscaller.unit_details(name)
-        print(f"Full details {name}: ", len(unit))
         info_dialog = InfoDialog(self.window, name, unit)
         info_dialog.run()
         info_dialog.destroy()
@@ -364,11 +346,9 @@ class ServiceMonitor:
         selection = treeview.get_selection()
         model, row = selection.get_selected()
         if not model or not row:
-            print("Error, nothing selected for method")
             return
         name, *k = model.get(row, self.COL_NAME)
         if not name:
-            print("Error, bad name for method")
             return
 
         response = False
@@ -389,14 +369,11 @@ class ServiceMonitor:
         selection = treeview.get_selection()
         model, row = selection.get_selected()
         if not model or not row:
-            print("Error, nothing selected for method")
             return
         name, unitfilestate, *k = model.get(row, self.COL_NAME, self.COL_UFSTATE)
         if not name:
-            print("Error, bad name for method")
             return
         if unitfilestate != "enabled" and unitfilestate != "disabled":
-            print("Error, unit file state cannot be changed", unitfilestate)
             return
 
         response = False
@@ -412,10 +389,7 @@ class ServiceMonitor:
             self.refresh_manager()
         else:
             output = ps.stdout.decode('utf-8')
-            error = ps.stderr.decode('utf-8')
-            print(f"Could not perform change unit file state for {name}")
-            print(error)
-            print(output)
+            output += ps.stderr.decode('utf-8')
             msgdlg = Gtk.MessageDialog(transient_for=self.window, message_type=Gtk.MessageType.ERROR,
                                        buttons=Gtk.ButtonsType.OK,
                                        text=f"Could not change unit file state {name}")
@@ -460,16 +434,6 @@ class ServiceMonitor:
         target_ui["hidden_cols"] = hidden_list
 
     def run(self):
-        self.dbusready = self.dbuscaller.init_dbus()
-        self.dbusready = self.dbuscaller.subscribe_signals(self.refresh_manager)
-
-        self.toolbar_state()
-        self.window.show_all()
-        self.current_ui = self.service_ui
-        self.refresh_ui()
-        Gtk.main()
-
-    def startup(self):
         # load user settings
         PrefStorage.load()
 
@@ -477,6 +441,7 @@ class ServiceMonitor:
         builder.connect_signals(self)
         self.window = builder.get_object("main_window")
         self.window.set_title(ABOUT_NAME)
+
         self.service_ui["treeview"] = builder.get_object("treeview_services")
         self.timer_ui["treeview"] = builder.get_object("treeview_timers")
         self.socket_ui["treeview"] = builder.get_object("treeview_sockets")
@@ -484,9 +449,9 @@ class ServiceMonitor:
         self.action_toolbar = builder.get_object("unitaction_toolbar")
         self.status_label = builder.get_object("status_label")
         self.show_inactive = builder.get_object("show_inactive")
+
         # load hidden columns and build the tree view
         self.service_ui["hidden_cols"] = PrefStorage.get(PrefStorage.HIDE_SERVICE_COL)
-        print("Hidden cols: ", self.service_ui["hidden_cols"])
         self.buildui("service", self.service_ui)
         self.timer_ui["hidden_cols"] = PrefStorage.get(PrefStorage.HIDE_TIMER_COL)
         self.buildui("timer", self.timer_ui)
@@ -516,14 +481,11 @@ class ServiceMonitor:
                 self.window.move(newx, newy)
                 self.window.set_default_size(neww, newh)
 
+        self.dbusready = self.dbuscaller.init_dbus()
+        self.dbusready = self.dbuscaller.subscribe_signals(self.refresh_manager)
 
-if len(sys.argv) < 2:
-    print("Missing lib dir, exiting")
-    exit(1)
-elif len(sys.argv) == 2:
-    mainwindow = ServiceMonitor(sys.argv[1])
-else:
-    mainwindow = ServiceMonitor(sys.argv[1], sys.argv[2])
-
-mainwindow.startup()
-mainwindow.run()
+        self.toolbar_state()
+        self.window.show_all()
+        self.current_ui = self.service_ui
+        self.refresh_ui()
+        Gtk.main()

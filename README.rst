@@ -23,21 +23,32 @@ are needed:
 * python3
 * python3-gi (gobject-introspection)
 
-You can install it with the supplied make script
+
+It's a simple python application so there is no automake or meson or pip, but there is
+supplied make script that will install a few files and icons for you
 ::
     git clone https://github.com/thekhalifa/servicemonitor
     cd servicemonitor
     sudo make install
 
-Then you should find *Service Monitor* app
+Then you should find *Service Monitor* app in your app menu.
+
+
+Uninstall with the same make script (but it leaves the icons)
+::
+    sudo make uninstall
 
 
 How to run locally
 ------------------
 You can run the application from the current directly, but some icons will be missing
 ::
-    make runlocal
+    chmod u+x servicemonitor-local.py   # if needed
+    ./servicemonitor-local.py
 
-Roadmap
--------
-For roadmap, check the TODO file and feel free to raise issues through Github
+
+Todo
+----
+* Move actions to separate thread so it doesn't block UI
+* Info dialog: Add copy to clipboard for main treeview or info treeview
+

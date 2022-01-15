@@ -1,7 +1,7 @@
 [Desktop Entry]
 Name=Service Monitor
 Comment=Live monitor for systemd units
-Exec=servicemonitor.sh
+Exec=servicemonitor
 Icon=servicemonitor
 Terminal=false
 Type=Application

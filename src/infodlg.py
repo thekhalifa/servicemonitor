@@ -7,9 +7,9 @@ from gi.repository import Gtk
 
 class InfoDialog(Gtk.Dialog):
     """Info Dialog for details of a unit
-        expects a Unit object which is a dict essentially
+        expects a Unit object which is a dict, but knows how to format the values
     """
-    def __init__(self, parent, heading="", unit={"...": ""}):
+    def __init__(self, parent, heading, unit):
         super().__init__(title=f"{heading} Properties", transient_for=parent, modal=True,
                          use_header_bar=True)
         self.set_default_size(400, 350)
@@ -22,8 +22,8 @@ class InfoDialog(Gtk.Dialog):
 
         liststore = Gtk.ListStore(str, str)
         liststore.set_sort_column_id(0, Gtk.SortType.ASCENDING)
-        for key, value in unit.items():
-            liststore.append([key, str(value)])
+        for key in unit:
+            liststore.append([key, unit.getprop_fmt(key)])
 
         treeview = Gtk.TreeView(model=liststore)
         keycol = Gtk.TreeViewColumn("Property", Gtk.CellRendererText(), text=0)
@@ -37,12 +37,3 @@ class InfoDialog(Gtk.Dialog):
         contentbox.pack_start(scrollbox, True, True, 5)
         self.show_all()
 
-
-# if __name__ == "__main__":
-#     print("Running dialog")
-#     testunit = {"Name": "cups.service",
-#                 "Service": "cups",
-#                 "Description": "CUPS Printing Service"}
-#     i = InfoDialog(None, "cups.service", testunit)
-#     print("Response was:", i.run())
-#     i.destroy()

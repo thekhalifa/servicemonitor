@@ -1,5 +1,9 @@
-#!/usr/bin/env bash
-SM_LIB_DIR=/usr/lib/servicemonitor
-
-cd $SM_LIB_DIR
-/usr/bin/env python3 application.py $SM_LIB_DIR
+#!/usr/bin/env python3
+import os
+import sys
+RUN_LIB_DIR = '/usr/lib/servicemonitor'
+os.chdir(RUN_LIB_DIR)
+sys.path.insert(1, os.path.abspath(os.path.join(RUN_LIB_DIR, "..")))
+from servicemonitor import ServiceMonitor
+sm = ServiceMonitor(os.getcwd())
+sm.run()

@@ -3,8 +3,8 @@
 import time
 import unittest
 
-from unit import Unit
-from dbuscaller import DBusCaller
+from src.unit import Unit
+from src.dbuscaller import DBusCaller
 
 
 class DBusCallerStateTestCase(unittest.TestCase):

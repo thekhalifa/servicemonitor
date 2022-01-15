@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 
 from gi.repository import Gio, GLib
-from unit import Unit
+from .unit import Unit
 
 
 class DBusCaller:
@@ -96,7 +96,6 @@ class DBusCaller:
         try:
             return self.send_message(unitpath, self.dbus_prop, "GetAll", "(s)", [ifname])
         except GLib.GError as ge:
-            # print("GError, code", ge.code, "message:", ge.message, "args:", ge.args)
             return {}
 
     def list_units(self, statelist=['active'], unitlist=['*.service']):
@@ -117,7 +116,6 @@ class DBusCaller:
             return units
 
         for unit in units:
-            # print("--Unit ", unit['Name'], ", path: ", unit['Path'])
             unitprops = self.getprops(unit['Path'])
             serviceprops = self.getprops(unit['Path'], unit['UnitType'])
             for col in detail_columns:
@@ -148,7 +146,6 @@ class DBusCaller:
         if not self._is_connected() or not self._LIVE_CALLS:
             return False
 
-        print("Subscribing to manager signals...")
         self.signalsubs = self.dbusconn.signal_subscribe(None, "org.freedesktop.systemd1.Manager", None, None, None,
                                                          Gio.DBusSignalFlags.NONE, self.on_manager_signal, "DBCMgr")
         if self.signalsubs:
@@ -169,34 +166,25 @@ class DBusCaller:
         if userdata and userdata == "DBCMgr" and path == self.mgr_path:
             # print("DBusCaller: Manager signal being processed...")
             self.process_signal(signal, params)
-        else:
-            print("DBusCaller: ignoring manager signal on iface", iface, "and path", path)
+        # else:
+        #    print("DBusCaller: ignoring manager signal on iface", iface, "and path", path)
 
     def process_signal(self, signal, params):
         if not signal or not self.signal_refresh_cb:
-            print("DBusCaller: Skipping signal", signal, "params", params, "cb", self.signal_refresh_cb)
             return
         if signal == "Reloading":
-            print("DBusCaller: [Reload]] signal")
             if params:
                 value, *k = params
                 if not value:
-                    print("            -- Done")
                     self.signal_refresh_cb()
-        elif signal == "JobNew":
-            print("DBusCaller: [JobNew] signal, doing nothing.")
         elif signal == "JobRemoved":
-            print("DBusCaller: [JobRemoved] signal, sending refresh call")
             self.signal_refresh_cb()
         elif signal == "UnitFilesChanged":
-            print("DBusCaller: [UnitFilesChanged] signal, sending refresh call")
             self.signal_refresh_cb()
         elif signal == "UnitNew":
-            print("DBusCaller: [UnitNew] signal, doing nothing.")
+            self.signal_refresh_cb()
         elif signal == "UnitRemoved":
-            print("DBusCaller: [UnitRemoved] signal, doing nothing.")
-        else:
-            print(f"DBusCaller: [Unknown] signal ({signal}), doing nothing.")
+            self.signal_refresh_cb()
 
     def unit_method(self, unitname, method):
         if not unitname or not method:
@@ -204,46 +192,11 @@ class DBusCaller:
 
         unitpath = self.getunitpath(unitname)
         if not unitpath:
-            print("ERROR, invalid path for", unitname)
             return False
         if method not in self._ALLOWED_UNIT_METHODS:
             print("ERROR, method not allowed", method)
             return False
 
         jobid = self.send_message(unitpath, self.iface_unit, method, "(s)", ["fail"])
-        print(f"DBusCaller: Response for [{method}] of [{unitname}]: jobid: {jobid}")
         return True
-
-    def unit_file_enable(self, unitname):
-        if not unitname:
-            print("unit_file_enable: Error, bad unit name", unitname)
-            return False
-        return self.manager_method("EnableUnitFiles", "(asbb)", ([unitname], False, True))
-
-    def unit_file_disable(self, unitname):
-        if not unitname:
-            print("unit_file_disable: Error, bad unit name", unitname)
-            return False
-        return self.manager_method("DisableUnitFiles", "(asb)", ([unitname], True))
-
-    def manager_method(self, method, vartype, param):
-        if not method or not vartype:
-            print("DBusCaller: manager_method error, method or vartype missing", method, vartype)
-            return False
-
-        if method not in self._ALLOWED_MGR_METHODS:
-            print("DBusCaller: manager_method error, method not allowed", method)
-            return False
-
-        response = self.send_message(self.mgr_path, self.mgr_interface, method, vartype, param, False)
-        print(f"DBusCaller: Response for [{method}]: {repr(response)}")
-        return True
-
-    def __repr__(self):
-        rep = f"{type(self)}\n"
-        for d in dir(self):
-            if d[0:2] == "__":
-                continue
-            rep += f"-- {d}\n"
-        return rep
 
