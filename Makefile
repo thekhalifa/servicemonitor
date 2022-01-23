@@ -47,9 +47,11 @@ dist: clean
 .PHONY: dist
 
 test:
-	PYTHONPATH=. python3 tests/test_unit.py
+	PYTHONPATH=. /usr/bin/python3 tests/test_unit.py
+	# these tests require closing several ui dialogs that popup, needs a human
 	# cd tests && PYTHONPATH=.. python3 test_application.py
-	PYTHONPATH=. python3 tests/test_dbuscaller.py
+	# These tests need to be run on a live dbus/systemd host
+	# PYTHONPATH=. /usr/bin/python3 tests/test_dbuscaller.py
 
 install: installpackage
 	@echo Install complete
