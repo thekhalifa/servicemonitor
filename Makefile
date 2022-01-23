@@ -4,8 +4,8 @@ prefix=/usr
 DATA_DIR=data/
 SRC_DIR=src/
 TEST_DIR=tests/
-DEBSRC_DIR=debian/
 DIST_DIR=dist/
+TARBALL_BASE=servicemonitor-0.2
 
 APP_ICON_DIR=${DATA_DIR}icons/apps64/
 STATUS_ICON_DIR=${DATA_DIR}icons/status48/
@@ -37,12 +37,13 @@ clean:
 	@echo Removing dist dir and pycache files
 	@rm -rfv src/__pycache__
 	@rm -rfv ${DIST_DIR}
+	@rm -fv ${TARBALL_BASE}.tar.gz
 
 dist: clean
 	mkdir -pv ${DIST_DIR}
-	cp -rv ${DATA_DIR} ${SRC_DIR} ${TEST_DIR} ${DEBSRC_DIR} ${DIST_DIR}
+	cp -rv ${DATA_DIR} ${SRC_DIR} ${TEST_DIR} ${DIST_DIR}
 	cp -v ${RUN_FILE} LICENSE README.rst Makefile ${DIST_DIR}
-	tar -czf servicemonitor-0.2.tar.gz dist/ --transform 's;dist;servicemonitor-0.2;g'
+	tar -czf ${TARBALL_BASE}.tar.gz dist/ --transform "s;dist;${TARBALL_BASE};g"
 
 .PHONY: dist
 
