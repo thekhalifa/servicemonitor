@@ -74,10 +74,6 @@ class DBusCallerStateTestCase(unittest.TestCase):
         self.assertRegex(self.dc.getunitpath('cups.service'), "/.*/cups_2eservice")
         self.assertIsNone(self.dc.getunitpath('badvalue.service'))
 
-    def test_unitpath(self):
-        self.assertRegex(self.dc.getunitpath('cups.service'), "/.*/cups_2eservice")
-        self.assertIsNone(self.dc.getunitpath('badvalue.service'))
-
     def test_unitprops(self):
         badresults = self.dc.getprops(None)
         self.assertIsInstance(badresults, dict)
@@ -169,7 +165,12 @@ class DBusCallerStateTestCase(unittest.TestCase):
         self.assertFalse(self.dc.unit_method("cups.service", None))
         self.assertFalse(self.dc.unit_method("cups.service", "Kill"))
         self.assertFalse(self.dc.unit_method("cups.service", "RestartUnit"))
+
+    def manual_unit_method(self):
+        """May be dangerous to run, so renaming to manual so it doesn't run with 'make test'"""
         self.assertTrue(self.dc.unit_method("cups.service", "Restart"))
+        self.assertTrue(self.dc.unit_method("cups.service", "Stop"))
+        self.assertTrue(self.dc.unit_method("cups.service", "Start"))
 
 
 if __name__ == '__main__':

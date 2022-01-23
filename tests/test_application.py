@@ -1,3 +1,4 @@
+import os
 import unittest
 
 import gi
@@ -11,6 +12,13 @@ from src.unit import Unit
 
 
 class SystemMonitorTestCase(unittest.TestCase):
+
+    src_dir = "src"
+
+    @classmethod
+    def setUpClass(cls):
+        if os.getcwd().endswith("tests"):
+            cls.src_dir = "../" + cls.src_dir
 
     def test_application_preferences_dialog(self):
         sm = ServiceMonitor("../src")

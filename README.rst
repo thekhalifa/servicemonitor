@@ -29,7 +29,7 @@ supplied make script that will install a few files and icons for you
 ::
     git clone https://github.com/thekhalifa/servicemonitor
     cd servicemonitor
-    sudo make install
+    sudo make manual-install
 
 Then you should find *Service Monitor* app in your app menu.
 

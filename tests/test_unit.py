@@ -13,8 +13,8 @@ class UnitTestCase(unittest.TestCase):
         self.assertEqual(u.getprop_fmt("Path"), "")
         self.assertEqual(u["Description"], "")
         self.assertEqual(u.getprop_fmt("Description"), "")
-        self.assertIsNone(u.getprop_fmt("UNKNOWN"))
-        self.assertIsNone(u.getprop_fmt("UnitType"))
+        self.assertEqual(u.getprop_fmt("UNKNOWN"), "")
+        self.assertEqual(u.getprop_fmt("UnitType"), "")
 
     def test_simple2(self):
         u = Unit("test2.service", "/unit/test2_2e_service", "Test Service", "LOADED", "ACTIVE", "RUNNING")

@@ -31,6 +31,8 @@ class Unit(dict):
         if value is None and ' ' in prop:
             otherkey = prop.replace(' ', '')
             value = self.get(otherkey)
+        elif value is None:
+            return ''
 
         if isinstance(value, list):
             if value and (isinstance(value[0], str) or isinstance(value[0], tuple)):
