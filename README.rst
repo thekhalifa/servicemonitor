@@ -17,12 +17,23 @@ Help with testing and issues is very welcome through github
 
 How to install
 --------------
-As this uses python3 and queries DBus through GLib, the following dependencies
-are needed:
+The most common way to install is from PPA respository if you're using a Debian based distro.
 
-* python3
-* python3-gi (gobject-introspection)
+Install from PPA
+^^^^^^^^^^^^^^^^
+The quickest way to install is to add the PPA repository and install from there with:
+::
+    sudo add-apt-repository ppa:thekhalifa/ppa
+    sudo apt-get update
+    sudo apt-get install servicemonitor
 
+Then you should find *Service Monitor* app in your app menu.
+
+Alternatively you can download the .deb archives directly from
+https://launchpad.net/~thekhalifa/+archive/ubuntu/ppa/+packages
+
+Install manually
+^^^^^^^^^^^^^^^^
 
 It's a simple python application so there is no automake or meson or pip, but there is
 supplied make script that will install a few files and icons for you
@@ -32,6 +43,14 @@ supplied make script that will install a few files and icons for you
     sudo make manual-install
 
 Then you should find *Service Monitor* app in your app menu.
+
+The following dependecies should be pretty standard on systemd distros, but here is the list:
+
+* python3 (>= 3.8)
+* python3-gi (>= 3)
+* dconf-gsettings-backend | gsettings-backend
+* gir1.2-gtk-3.0 (>= 3.24)
+* dbus (>= 1.12), systemd (>= 240)
 
 
 Uninstall with the same make script (but it leaves the icons)
